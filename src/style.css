@@ -43,6 +43,15 @@ form .form-group {
   font-size: 16px;
 }
 
+.form_container form select {
+  display: block;
+  padding: 9px;
+  width: 100%;
+  border: 1px solid black;
+  margin-top: 3px;
+  font-size: 16px;
+}
+
 .form_container form button {
   padding: 7px 25px;
   background-color: green;
@@ -59,4 +68,16 @@ form .form-group {
 
 .text_error {
   color: red;
+}
+
+@media screen and (max-width: 900px) {
+  .form_container {
+    width: 60vw;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .form_container {
+    width: 70vw;
+  }
 }
