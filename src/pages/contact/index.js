@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import InputWithTitle from '../../components/InputWithTitle';
 import InputSelectWithTitle from '../../components/InputSelectWithTitle';
+import axios from 'axios';
+import Alert from '../../components/Alert';
 
 function ContactPage() {
   const [name, setName] = useState('');
@@ -11,14 +13,45 @@ function ContactPage() {
   const [gender, setGender] = useState('');
   const [address, setAddress] = useState('');
   const [errors, setErrors] = useState([]);
+  const [alert, setAlert] = useState({type: '', message: ''});
+
+  const resetForm = () => {
+    setName('');
+    setBirthPlace('');
+    setBirthDate('');
+    setEmail('');
+    setPhone('');
+    setGender('');
+    setAddress('');
+  }
+
+  const handleAlert = (type, message) => {
+    setAlert({ type, message });
+  };
+
+  const clearAlert = () => {
+    setAlert({type: '', message: ''});
+    resetForm()
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const error = validate()
     setErrors(error);
 
+    console.log('isi error', error);
+
     if (Object.keys(error).length === 0) {
-      alert("Done");
+      let payload = {
+        name, birthdate, birthplace, email, phone, gender, address
+      }
+      console.log('isi payload', payload);
+      axios.post('http://localhost:5500/api/contact', payload).then(res => {
+        console.log('isi res', res)
+        handleAlert('success', res.data.data.message || 'Data saved successfully')
+      }).catch(err => {
+        handleAlert('error', err.data.data.message || 'Some error occurred while creating the Contact')
+      })
     }
   }
 
@@ -26,14 +59,14 @@ function ContactPage() {
     const error = {};
 
     if (!name) error.name = "Name is required"
-    else error.name = ""
+    // else error.name = ""
     
     if (!email) error.email = "Email is required"
-    else if (/\S+@\S+\.\S+/.test(email)) error.email = "Email not matched"
-    else error.email = ""
+    else if (!/\S+@\S+\.\S+/.test(email)) error.email = "Email not matched"
+    // else error.email = ""
 
     if (!phone) error.phone = "Phone is required"
-    else error.name = ""
+    // else error.phone = ""
 
     return error;
   }
@@ -51,8 +84,15 @@ function ContactPage() {
           />
           <InputWithTitle
             id={'birthplace'} 
-            title={'Birthplace'}
+            title={'Birth Place'}
             onChange={(e) => setBirthPlace(e.target.value)}
+            errors={errors}
+          />
+          <InputWithTitle
+            id={'birthdate'} 
+            title={'Birth Date'}
+            type='date'
+            onChange={(e) => setBirthDate(e.target.value)}
             errors={errors}
           />
           <InputWithTitle
@@ -86,9 +126,10 @@ function ContactPage() {
             onChange={(e) => setAddress(e.target.value)}
             errors={errors}
           />
-          <button>Daftar</button>
+          <button>Submit</button>
         </form>
       </div>
+      {alert && <Alert type={alert.type} message={alert.message} onClose={clearAlert} />}
     </div>
   );
 }
