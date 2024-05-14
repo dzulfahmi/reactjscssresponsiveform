@@ -3,8 +3,12 @@ import InputWithTitle from '../../components/InputWithTitle';
 import InputSelectWithTitle from '../../components/InputSelectWithTitle';
 import axios from 'axios';
 import Alert from '../../components/Alert';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function ContactPage() {
+  const navigate = useNavigate();
+
   const [name, setName] = useState('');
   const [birthplace, setBirthPlace] = useState('');
   const [birthdate, setBirthDate] = useState('');
@@ -25,15 +29,6 @@ function ContactPage() {
     setAddress('');
   }
 
-  const handleAlert = (type, message) => {
-    setAlert({ type, message });
-  };
-
-  const clearAlert = () => {
-    setAlert({type: '', message: ''});
-    resetForm()
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
     const error = validate()
@@ -48,9 +43,26 @@ function ContactPage() {
       console.log('isi payload', payload);
       axios.post('http://localhost:5500/api/contact', payload).then(res => {
         console.log('isi res', res)
-        handleAlert('success', res.data.data.message || 'Data saved successfully')
+        Swal.fire({
+          title: 'Success',
+          text: res.data.data.message || 'Data saved successfully',
+          icon: 'success',
+          confirmButtonText: 'Ok'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            resetForm();
+            navigate('/')
+          }
+        })
+        // handleAlert('success', res.data.data.message || 'Data saved successfully')
       }).catch(err => {
-        handleAlert('error', err.data.data.message || 'Some error occurred while creating the Contact')
+        Swal.fire({
+          title: 'Sorry',
+          text: err.data.data.message || 'Some error occurred while creating the Contact',
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        })
+        // handleAlert('error', err.data.data.message || 'Some error occurred while creating the Contact')
       })
     }
   }
@@ -126,10 +138,14 @@ function ContactPage() {
             onChange={(e) => setAddress(e.target.value)}
             errors={errors}
           />
-          <button>Submit</button>
+          <div className='button-group'>
+            <button className='button-green'>Submit</button>
+            <div className='ws-4' />
+            <button className='button-orange' onClick={() => navigate('/')}>Back</button>
+          </div>
         </form>
       </div>
-      {alert && <Alert type={alert.type} message={alert.message} onClose={clearAlert} />}
+      {/* {alert && <Alert type={alert.type} message={alert.message} onClose={clearAlert} />} */}
     </div>
   );
 }
